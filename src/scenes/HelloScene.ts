@@ -5,8 +5,10 @@ import brick from '../assets/scribble/png/default/tile_brick.png';
 let cursors: { left: any; right: any; up: any; down: any; space?: Phaser.Input.Keyboard.Key; shift?: Phaser.Input.Keyboard.Key; };
 let char1: Phaser.Physics.Arcade.Sprite;
 let char2: Phaser.Physics.Arcade.Sprite;
+let keys: object;
 const speed = 400;
 export default class HelloScene extends Phaser.Scene {
+    private keys!: { [key: string]: Phaser.Input.Keyboard.Key };
     constructor() {
         super('hello');
     }
@@ -34,15 +36,24 @@ export default class HelloScene extends Phaser.Scene {
         char1.setCollideWorldBounds(true);
         char1.flipX = true;
 
-        this.add.image(200, 250, 'char2');
+        char2 = this.physics.add.sprite(200, 250, 'char2');
+        char2.setCollideWorldBounds(true);
 
         const ground = this.physics.add.staticGroup();
         for (let i = 0; i < 14; i++) {
             ground.create(32 + i * 60, 568, 'brick').setScale(1).refreshBody();
         }
         this.physics.add.collider(char1, ground);
+        this.physics.add.collider(char2, ground);
 
         cursors = this.input.keyboard.createCursorKeys();
+        this.keys = this.input.keyboard.addKeys({
+            up: Phaser.Input.Keyboard.KeyCodes.W,
+            left: Phaser.Input.Keyboard.KeyCodes.A,
+            down: Phaser.Input.Keyboard.KeyCodes.S,
+            right: Phaser.Input.Keyboard.KeyCodes.D
+        }) as { [key: string]: Phaser.Input.Keyboard.Key };
+
     }
 
     update() {
@@ -57,6 +68,20 @@ export default class HelloScene extends Phaser.Scene {
 
         if (cursors.up.isDown && char1.body.touching.down) {
             char1.setVelocityY(-300);
+        }
+
+
+        if (this.keys.left.isDown) {
+            char2.setVelocityX(-speed)
+        }
+        else if (this.keys.right.isDown) {
+            char2.setVelocityX(speed)
+        } else {
+            char2.setVelocityX(0)
+        }
+
+        if (this.keys.up.isDown && char2.body.touching.down) {
+            char2.setVelocityY(-300);
         }
     }
 }
